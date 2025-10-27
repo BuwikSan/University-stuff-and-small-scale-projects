@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block podnadpis %}
+Formulář
+{% endblock %}
+
+{% block hlavniobsah %}
+<h2>Zbav se kočky</h2>
+<form action="/kontakt" method="post">
+    <fieldset>
+        <label for="jmenokocky">Jméno: </label>
+        <input type="text" id="jmenokocky" name="jmeno" placeholder="Zadej jméno kočky" required>
+        <br>
+        <label for="srstkocky">Barva srsti: </label>
+        <input type="text" id="srstkocky" name="barva_srsti" placeholder="Zadej barvu srsti" required>
+        <br>
+        <label for="vekkocky">Věk: </label>
+        <input type="text" id="vekkocky" name="vek" placeholder="Zadej věk kočky" required>
+    </fieldset>
+    <button type="submit">Zbav se jí</button>
+</form>
+{% endblock %}

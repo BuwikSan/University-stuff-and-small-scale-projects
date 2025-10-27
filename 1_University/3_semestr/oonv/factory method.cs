@@ -1,0 +1,1 @@
+dotnet new console -n Factorymethod --use-program-main

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block podnadpis %}
+Kočky
+{% endblock %}
+
+{% block hlavniobsah %}
+<h2>Seznam koček k adopci</h2>
+<ol>
+    {% for kocka in data %}
+    <li>
+        <ul style="list-style: none;">
+            <li>Jméno: {{ kocka["jmeno"] }}</li>
+            <li>Barva srsti: {{ kocka["barva_srsti"] }}</li>
+            <li>Věk: {{ kocka["vek"] }}</li>
+        </ul>
+    </li>
+    {% endfor %}
+</ol>
+{% endblock %}

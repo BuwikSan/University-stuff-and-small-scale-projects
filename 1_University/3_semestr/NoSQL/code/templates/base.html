@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="counters">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utulkomat | {% block podnadpis %}{% endblock %}</title>
+    <style>
+      .counters { font-size: 0.9rem; color: #333; margin-bottom: 0.5rem; }
+      .counters span { margin-right: 1rem; }
+    </style>
+</head>
+<body> 
+    <header>
+        <h1>Útulkomat</h1>
+        <div class="counters">
+            <span>Tvůj počet zobrazení této stránky: {{ page_visits }}</span>
+            <span>Celkový počet zobrazení (všechny stránky): {{ global_count }}</span>
+        </div>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="/home">O nás</a></li>
+            <li><a href="/seznamkocek">Kočky</a></li>
+            <li><a href="/kontakt">Napiš nám</a></li>
+        </ul>
+    </nav>
+    <main>
+        {% block hlavniobsah %}{% endblock %}
+    </main>
+    <footer>
+        <p>Copyright &copy; Beranek Pavel</p>
+    </footer>
+</body>
+</html>
