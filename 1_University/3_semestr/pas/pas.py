@@ -99,7 +99,7 @@ def read_RData_file(relative_path):
 
 
 def cvika_2():
-    duvera_data_raw = pyreadr.read_r(fr'1_University\3_semestr\pas\Duvera_24.RData')
+    duvera_data_raw = pyreadr.read_r(fr'1_University\3_semestr\pas\data\Duvera_24.RData')
     #okresy_data = pyreadr.read_r(fr'1_University\3_semestr\pas\Okresy03.RData')
     print(duvera_data_raw)
     print(duvera_data_raw.keys())
@@ -138,7 +138,7 @@ def cvika_4():
 #print(okresy_data)
 
 if __name__ == "__main__":
-    path = fr'1_University\3_semestr\pas\Policie.RData'
+    path = fr'1_University\3_semestr\pas\data\Policie.RData'
     try:
         results = read_RData_file(path)
         print(results)
