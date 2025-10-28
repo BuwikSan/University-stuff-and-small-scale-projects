@@ -11,7 +11,7 @@ from scipy import stats
 # ---------------------------------------------------
 # 1. Načtení dat
 # ---------------------------------------------------
-policie = pd.read_csv("policie.csv", encoding="utf-8")
+policie = pd.read_csv("1_University\\3_semestr\\pas\\python-rewrite\\policie.csv", encoding="utf-8")
 
 # Pomocné funkce
 def freq_table(series, bins=None):

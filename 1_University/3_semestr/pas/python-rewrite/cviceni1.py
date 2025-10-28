@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # --- Načtení dat ze souboru prij.csv ---
-prij = pd.read_csv("prij.csv", encoding="utf-8")
+prij = pd.read_csv("1_University\\3_semestr\\pas\\python-rewrite\\prij.csv", encoding="utf-8")
 
 # --- Absolutní a relativní četnosti pro Matur.drive ---
 matur = prij["Matur.drive"]

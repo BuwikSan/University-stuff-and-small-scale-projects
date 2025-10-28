@@ -75,8 +75,8 @@ def freq_polygon(x_vals, counts, title, xlab, ylab="Absolutni cetnosti",
 # Načtení dat
 # -------------------------------
 
-duvera_path = Path("duvera.csv")
-cars_path   = Path("Cars93.csv")
+duvera_path = Path("1_University\\3_semestr\\pas\\python-rewrite\\duvera.csv")
+cars_path   = Path("1_University\\3_semestr\\pas\\python-rewrite\\Cars93.csv")
 
 if not duvera_path.exists():
     raise FileNotFoundError("Soubor 'duvera.csv' nebyl nalezen.")
