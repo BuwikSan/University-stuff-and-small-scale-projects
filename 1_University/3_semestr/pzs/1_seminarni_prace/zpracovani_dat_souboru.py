@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
+import wfdb  # local import to avoid hard dependency if not installed
 
 
 def read_record_to_df(path, channel_names=None, fs_default=500, n_channels=None):
@@ -19,25 +19,22 @@ def read_record_to_df(path, channel_names=None, fs_default=500, n_channels=None)
     path = Path(path)
     # try wfdb first
     try:
-        print("wfdb")
-        import wfdb  # local import to avoid hard dependency if not installed
         record_base = str(path.with_suffix(""))
         sig, fields = wfdb.rdsamp(record_base)
         fs = fields.get("fs", fs_default)
-        if fs is not None:
-            print("fs:", fs)
-        else:
-            print("fs not found in header, using default:", fs_default)
         cols = fields.get("sig_name") or channel_names or [f"ch{i}" for i in range(sig.shape[1])]
         df = pd.DataFrame(sig, columns=cols)
         df.index = pd.RangeIndex(start=0, stop=len(df)) / float(fs)
         df.index.name = "time_s"
+        print("wfdb", fs)
         return df
     except Exception:
         pass
 
+
+    # tohle neřeš se to stejně nepoužije
     # -------------------------------------------------------------------------------------------------------------------------
-    # za timhle neřeš
+    print("načtení pomocí wfdb selhalo")
     # fallback: read raw bytes and interpret as little-endian signed 16-bit
     raw = path.read_bytes()
     # skip BOM if present (some .dat from download may include BOM/text header)
@@ -76,12 +73,7 @@ def read_record_to_df(path, channel_names=None, fs_default=500, n_channels=None)
     df.index = pd.RangeIndex(start=0, stop=len(df)) / float(fs_default)
     df.index.name = "time_s"
     return df
-
-
-
-
-
-
+    # -----------------------------------------------------------------------------------------------------------
 
 
 
@@ -97,6 +89,7 @@ if __name__ == "__main__":
     try:
         df = read_record_to_df(file_path, channel_names=["ecg", "abp", "icp"], fs_default=250)
         print(df.head(10))
+        print(df.tail(10))
         print(df.describe().loc[["min", "max"]])
     except Exception as e:
         print("read error:", e)
