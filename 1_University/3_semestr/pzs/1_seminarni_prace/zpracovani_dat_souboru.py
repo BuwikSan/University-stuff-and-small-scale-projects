@@ -1,5 +1,3 @@
-# ...existing code...
-import os
 from pathlib import Path
 
 import numpy as np
@@ -93,4 +91,3 @@ if __name__ == "__main__":
         print(df.describe().loc[["min", "max"]])
     except Exception as e:
         print("read error:", e)
-# ...existing code...
