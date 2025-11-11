@@ -1,6 +1,8 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, make_response, Response
 import os
 import json
+from functools import wraps
+
 import redis
 from pymongo import MongoClient
 
@@ -23,6 +25,7 @@ client = None
 db = None
 cats_col = None
 
+CACHE_TTL = 5  # seconds
 
 def init_stores():
     """
@@ -54,7 +57,73 @@ DEFAULT_CATS = [
     {"jmeno": "zbynda", "barva_srsti": "bila", "vek": 10},
 ]
 
-CACHE_TTL = 5  # seconds
+def cache_page(timeout=CACHE_TTL):
+    """
+    Cache the full rendered HTML of a view using Redis.
+    Key is based on request.path + query string. Only safe for pages
+    that don't include per-session or per-user dynamic content.
+    """
+    def decorator(view):
+        @wraps(view)
+        def wrapped(*args, **kwargs):
+            # ensure redis/client are available
+            try:
+                init_stores()
+            except Exception:
+                pass
+
+            key = None
+            try:
+                if r:
+                    # build cache key from path + query
+                    qs = request.query_string.decode() if request.query_string else ""
+                    key = f"page_cache:{request.path}"
+                    if qs:
+                        key += f"?{qs}"
+                    cached = r.get(key)
+                    if cached:
+                        # return cached HTML directly
+                        resp = make_response(cached)
+                        resp.headers["X-Cache"] = "HIT"
+                        return resp
+            except Exception:
+                # any redis error -> don't break the app, just continue to build page
+                cached = None
+
+            # No cached page -> call the view
+            result = view(*args, **kwargs)
+
+            # If view returned a Flask Response, extract HTML, otherwise treat as str
+            html = None
+            try:
+                if isinstance(result, Response):
+                    html = result.get_data(as_text=True)
+                else:
+                    # view likely returned a rendered string already (render_template)
+                    html = result
+            except Exception:
+                # fallback: do not cache if something unexpected
+                html = None
+
+            # store in cache
+            try:
+                if key and html and r:
+                    r.set(key, html, ex=timeout)
+            except Exception:
+                pass
+
+            # mark miss (optional)
+            if isinstance(result, Response):
+                result.headers["X-Cache"] = "MISS"
+                return result
+            else:
+                resp = make_response(html)
+                resp.headers["X-Cache"] = "MISS"
+                return resp
+
+        return wrapped
+    return decorator
+
 
 def load_cats():
     """
@@ -117,7 +186,11 @@ def save_cats(cats):
 
     try:
         if r:
+            # update cats cache key (if you have it)
             r.set("cats_cache", json.dumps(cats), ex=CACHE_TTL)
+            # invalidate full page caches affected
+            r.delete("page_cache:/seznamkocek")
+            # if you cache multiple pages, delete those keys too
     except Exception:
         pass
 
@@ -126,7 +199,6 @@ def save_cats(cats):
 @app.before_request
 def track_visits():
     init_stores()
-    # skip static files
     if request.path.startswith("/static"):
         return
     try:
@@ -154,15 +226,26 @@ def inject_counters():
 
 @app.route("/")
 @app.route("/home")
+@cache_page(timeout=CACHE_TTL)
 def zobraz_home():
     return render_template("home.html")
 
+# @app.route("/seznamkocek")
+# def zobraz_kocky():
+#     cats = load_cats()
+#     return render_template("kocky.html", data=cats)
+
 @app.route("/seznamkocek")
-def zobraz_kocky():
+@cache_page(timeout=CACHE_TTL)
+def seznamkocek():
+    # build page same as before
     cats = load_cats()
-    return render_template("kocky.html", data=cats)
+    # user uses the existing 'kocky.html' template — return that to avoid
+    # TemplateNotFound if 'seznamkocek.html' doesn't exist
+    return render_template("kocky.html", cats=cats, data=cats)
 
 @app.route("/kontakt", methods=["GET", "POST"])
+@cache_page(timeout=CACHE_TTL)
 def zobraz_kontaktni_formular():
     if request.method == "GET":
         return render_template("kontakt.html")
@@ -193,3 +276,19 @@ def zobraz_kontaktni_formular():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
+
+    # CVIČENÍ 7 JE DETREMENTAL PRO ZÁPOČET
+    # 1. mongodb 
+    # 2. napln mongo db
+    # 3. vytvoř api endpointy
+    # 4. otestuj api endpointy (postman)
+
+    # rest API
+    # stavová a bezestavová komunikace
+    
+    ## CRUD
+    # create post
+    # read get
+    # update put
+    # delete delete 
