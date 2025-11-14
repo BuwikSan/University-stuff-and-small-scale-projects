@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, session, make_response, Response
+from flask import Flask, render_template, request, redirect, session, make_response, Response, jsonify, abort
 import os
 import json
 from functools import wraps
+import secrets
+import string
 
 import redis
 from pymongo import MongoClient
@@ -292,3 +294,7 @@ if __name__ == "__main__":
     # read get
     # update put
     # delete delete 
+
+    # na státincích Fíšuv dataset, ke mam provest 3 agregačni operace a vizualizovat je na webové stránce. Webovka může  být něco ve flask nebo dashboardu streamlit/dash
+
+    #TODO vytvoř to RestAPI funkční podle CRUD a vygeneruj si od chata hodně koček podle toho co tam mám, provď 3 agregační funkce nad tim datasetem a zobraz jejich výsledky do webovkyS
