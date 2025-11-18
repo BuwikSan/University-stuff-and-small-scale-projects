@@ -57,6 +57,16 @@ DEFAULT_CATS = [
     {"jmeno": "linda", "barva_srsti": "cerna", "vek": 5},
     {"jmeno": "pinda", "barva_srsti": "strakata", "vek": 17},
     {"jmeno": "zbynda", "barva_srsti": "bila", "vek": 10},
+    {"jmeno": "zbynda", "barva_srsti": "bila", "vek": 10},
+    {"jmeno": "zbynda", "barva_srsti": "bila", "vek": 10},
+    {"jmeno": "zbynda", "barva_srsti": "bila", "vek": 10},
+    {"jmeno": "zbynda", "barva_srsti": "bila", "vek": 10},
+    {"jmeno": "zbynda", "barva_srsti": "bila", "vek": 10},
+    {"jmeno": "zbynda", "barva_srsti": "bila", "vek": 10},
+    {"jmeno": "zbynda", "barva_srsti": "bila", "vek": 10},
+    {"jmeno": "zbynda", "barva_srsti": "bila", "vek": 10},
+    {"jmeno": "zbynda", "barva_srsti": "bila", "vek": 10},
+    {"jmeno": "zbynda", "barva_srsti": "bila", "vek": 10},
 ]
 
 def cache_page(timeout=CACHE_TTL):
@@ -297,4 +307,5 @@ if __name__ == "__main__":
 
     # na státincích Fíšuv dataset, ke mam provest 3 agregačni operace a vizualizovat je na webové stránce. Webovka může  být něco ve flask nebo dashboardu streamlit/dash
 
-    #TODO vytvoř to RestAPI funkční podle CRUD a vygeneruj si od chata hodně koček podle toho co tam mám, provď 3 agregační funkce nad tim datasetem a zobraz jejich výsledky do webovkyS
+    #TODO vytvoř to RestAPI funkční podle CRUD a vygeneruj si od chata hodně koček podle toho co tam mám, provď 3 agregační funkce nad tim datasetem a zobraz jejich výsledky do webovky
+    # ty tři výstupy agregací by mohli být nejčastější barva srsti, průměrný věk, a nejčastější věk nahraných koček
