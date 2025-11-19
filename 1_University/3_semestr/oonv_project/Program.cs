@@ -5,9 +5,14 @@ class Program
 {
     static void Main(string[] args)
     {
-        ZatutejATimPoslesBitcoin app = new ZatutejATimPoslesBitcoin();
-        app.TutProPenize();
-        TestBridge bridgeTest = new TestBridge();
-        bridgeTest.TestMe();
+        Komponent kavovar = new Kavovar();
+        Komponent kavovarAMleko = new MlekoDecorator(kavovar);
+        Komponent kavovarMlekoACukr = new CukrDecorator(kavovarAMleko);
+
+        Kafe kaficko = kavovarMlekoACukr.udelejKafe();
+        foreach (string vlastnost in kaficko.propertyList)
+        {
+            Console.WriteLine(vlastnost);
+        }
     }
 }
