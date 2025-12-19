@@ -223,6 +223,7 @@ class aproximace:
     def __init__(self):
         pass
 
+
 class num_der_a_int:
     def __init__(self):
         pass
@@ -231,11 +232,59 @@ class solve_odr:
     def __init__(self):
         pass
 
+class mnc:
+    def __init__(self):
+        pass
+
+    def mncfunc_python(self, x, y, phi):
+        """
+        Ekvivalent R funkce mncfunc.
+        Vytvoří matici A aplikací funkce phi na vektor x.
+        Poté řeší maticovou rovnici: solve(A @ A.T, A @ y).
+
+        :param x: Vektor/pole čísel.
+        :param y: Vektor/pole výsledků.
+        :param phi: Funkce aplikovaná na x pro vytvoření matice A.
+                    POZNÁMKA: Tato funkce by měla vrátit vektor/řádek, aby A byla matice.
+        :return: Řešení maticové operace.
+        """
+
+        # 1. Vytvoření matice A
+        # Ekvivalent R 'A <- sapply(x, phi)':
+        # 'sapply' v R vrací matici, pokud 'phi' vrací vektor stejné délky.
+        # V Pythonu to obvykle děláme pomocí list comprehension a np.vstack nebo np.array.
+        
+        # Předpoklad: phi(xi) vrací vektor/řádek, a to se stává řádkem v A.
+        A_rows = list(map(phi, x))
+        A = np.array(A_rows)
+        
+        # Kontrola pro správný tvar A a y
+        if A.shape[1] != len(y):
+            # Poznámka: R kód solve(A%*%t(A), A%*%y) obvykle funguje, jen pokud A%*%t(A) je čtvercová,
+            # což je vždy, ale rozměry musí sedět pro A%*%y.
+            # V mnoha případech (např. OLS) by se řešilo solve(t(A)%*%A, t(A)%*%y).
+            # Držím se ale striktně Vašeho R kódu.
+            pass
+
+        # 2. Řešení maticové rovnice
+        # Ekvivalent R 'return(solve(A%*%t(A), A%*%y))'
+        # '@' je operátor maticového násobení v Pythonu (od verze 3.5), ekvivalent np.dot().
+        # 'A.T' je transpozice matice A.
+        
+        M = A @ A.T  # Levá strana: A * A^T
+        V = A @ y    # Pravá strana: A * y
+
+        # np.linalg.solve(M, V) řeší M * řešení = V
+        reseni_soustav = reseni_soustav_lin_rovnic()
+        return np.linalg.solve(M, V)
+        #return reseni_soustav.gauss_s_pivotováním(M, V)
+
 
 
 def main():
     aproximator_korenu = Aproximace_korenu()
     reseni_soustav_lin = reseni_soustav_lin_rovnic()
+    metoda_nejmencich_ctvercu = mnc()
     print("věř mi, něco se stalo")
     print(aproximator_korenu.bisekce(lambda x: x*x*x, -2, 8))
     print(aproximator_korenu.regula_falsi(lambda x: x*x*x, -2, 3))
@@ -248,5 +297,15 @@ def main():
     print(reseni_soustav_lin.lu_rozklad(np.array([[10, 1, 1],[2, 10, 1],[2, 2, 10]]), np.array([12, 13, 14])))
     print(reseni_soustav_lin.jacobiova(np.array([[10, 1, 1],[2, 10, 1],[2, 2, 10]]), np.array([12, 13, 14])))
     print(reseni_soustav_lin.gauss_seidelova(np.array([[10, 1, 1],[2, 10, 1],[2, 2, 10]]), np.array([12, 13, 14])))
+
+    def phi(x):
+        n = 5
+        res = list([0,0,0,0,0])
+        res[0] = 1
+        for i in range(1, n):
+            res[i] = res[i - 1]*x
+        return res
+
+    print(metoda_nejmencich_ctvercu.mncfunc_python(np.array([1, 2, 3, 4, 5]), np.array([10, 20, 30, 40, 50]), phi))
 if __name__ == "__main__":
     main()

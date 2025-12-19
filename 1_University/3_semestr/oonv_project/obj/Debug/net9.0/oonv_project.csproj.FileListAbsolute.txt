@@ -1,0 +1,15 @@
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\obj\Debug\net9.0\oonv_project.GeneratedMSBuildEditorConfig.editorconfig
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\obj\Debug\net9.0\oonv_project.AssemblyInfoInputs.cache
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\obj\Debug\net9.0\oonv_project.AssemblyInfo.cs
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\obj\Debug\net9.0\oonv_project.csproj.CoreCompileInputs.cache
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\obj\Debug\net9.0\oonv_project.sourcelink.json
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\bin\Debug\net9.0\oonv_project.exe
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\bin\Debug\net9.0\oonv_project.deps.json
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\bin\Debug\net9.0\oonv_project.runtimeconfig.json
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\bin\Debug\net9.0\oonv_project.dll
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\bin\Debug\net9.0\oonv_project.pdb
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\obj\Debug\net9.0\oonv_project.dll
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\obj\Debug\net9.0\refint\oonv_project.dll
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\obj\Debug\net9.0\oonv_project.pdb
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\obj\Debug\net9.0\oonv_project.genruntimeconfig.cache
+C:\GitHub\University-stuff-and-small-scale-projects\1_University\3_semestr\oonv_project\obj\Debug\net9.0\ref\oonv_project.dll
