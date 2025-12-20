@@ -113,6 +113,21 @@ CREATE TABLE rooms (
     CONSTRAINT fk_rooms_function FOREIGN KEY (fk_func) REFERENCES functions(id_func)
 );
 
+
+DROP TABLE admin_emp;
+DROP TABLE emp_pos_relation;
+DROP TABLE employees;
+DROP TABLE subjects;
+DROP TABLE subject_species;
+DROP TABLE sex;
+DROP TABLE rooms;
+DROP TABLE functions;
+DROP TABLE buildings;
+DROP TABLE focus;
+DROP TABLE building_complexes;
+DROP TABLE positions;
+
+
 -- === INDEXY PRO OPTIMALIZACI VÝKONU ===
 -- Indexy pro vyhledávání zaměstnanců podle jména (častý dotaz)
 CREATE INDEX idx_employees_name ON employees(name);

@@ -51,3 +51,41 @@ FROM employees e
 FULL OUTER JOIN emp_pos_relation er ON e.id_employee = er.fk_employee
 FULL OUTER JOIN positions p ON er.fk_position = p.id_position
 WHERE e.name IS NULL OR p.name IS NULL;
+
+WITH RECURSIVE employee_tree AS (
+    SELECT id_employee, name, fk_supervisor, 1 as level
+    FROM employees
+    WHERE id_employee = 1 -- CEO
+    UNION ALL
+    SELECT e.id_employee, e.name, e.fk_supervisor, et.level + 1
+    FROM employees e
+    JOIN employee_tree et ON e.fk_supervisor = et.id_employee
+)
+SELECT * FROM employee_tree;
+
+CREATE VIEW prumer_zaznamu AS
+-- Průměrný počet záznamů na tabulku (velmi zjednodušeně pro účely zadání)
+SELECT (
+    (SELECT COUNT(*) FROM employees) +
+    (SELECT COUNT(*) FROM positions) +
+    (SELECT COUNT(*) FROM emp_pos_relation)
+) / 3.0 AS avg_records_per_table;
+
+CREATE VIEW serazeni_podle_platu_rozdeleno_pohlavim AS
+-- Analytická funkce (Pořadí zaměstnanců podle platu v rámci pohlaví)
+SELECT name, salary, fk_sex,
+       RANK() OVER (PARTITION BY fk_sex ORDER BY salary DESC) as salary_rank
+FROM employees
+WHERE salary IS NOT NULL;
+
+CREATE VIEW employee_hierarchy AS
+WITH RECURSIVE employee_tree AS (
+    SELECT id_employee, name, fk_supervisor, 1 as level
+    FROM employees
+    WHERE id_employee = 1 -- CEO
+    UNION ALL
+    SELECT e.id_employee, e.name, e.fk_supervisor, et.level + 1
+    FROM employees e
+    JOIN employee_tree et ON e.fk_supervisor = et.id_employee
+)
+SELECT * FROM employee_tree;
