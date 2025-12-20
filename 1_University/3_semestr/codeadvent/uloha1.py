@@ -6,7 +6,9 @@ PRACTICE_DATASET = ["L68", "L30", "R48", "L5", "R60", "L55", "L1", "L99", "R14",
 def points_to_zero(rotations, starting_rotation=50, number_of_positions = 100):
     sum_to_zero = 0
     current_position = starting_rotation
+
     for rotation in rotations:
+    
         rotation_direction, rotation_steps = parse_line(rotation)
         if rotation_direction == 'R':
             current_position = (current_position + rotation_steps) % number_of_positions
@@ -24,14 +26,17 @@ def parse_line(line: str):
     steps = int(line[1:])
     return direction, steps
 
-def give_password(kolekce, start_position=50, number_of_positions = 100):
+
+
+
+def give_password(rotations, start_position=50, number_of_positions = 100):
     
     current_position = start_position
     previous_position = start_position
     sum_point_to_zero = 0
     
-    for record in kolekce:
-        direction, steps = parse_line(record)
+    for rotation in rotations:
+        direction, steps = parse_line(rotation)
 
         if direction == 'R':
             current_position += steps

@@ -9,3 +9,6 @@ with open('resources/input2.txt', 'r', encoding='utf-8') as f:
 
 print(obsah)
 
+import uloha1 as u1
+
+u1.points_to_zero(['L150'])  # 2
