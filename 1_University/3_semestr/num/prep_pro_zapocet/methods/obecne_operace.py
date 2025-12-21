@@ -21,3 +21,13 @@ def multiply_matrices(a, b):
             for k in range(cols_a):
                 res[i][j] += a[i][k] * b[k][j]
     return res
+
+def make_matrix(řád, funkce_pro_doplnění_hodnot):
+    """Vytvoří matici daného řádu a naplní ji hodnotami z funkce."""
+    matice = []
+    for i in range(řád):
+        řádek = []
+        for j in range(řád):
+            řádek.append(funkce_pro_doplnění_hodnot(i, j))
+        matice.append(řádek)
+    return matice
