@@ -23,7 +23,6 @@ def lsa(x, y, n):
         return None
 
     # Inicializace matice A (n x n) a vektoru b (n)
-    # Odpovídá matrix.NewMatrix(n) a make(vector.Vector2, n)
     A = [[0.0 for _ in range(n)] for _ in range(n)]
     b = [0.0] * n
 

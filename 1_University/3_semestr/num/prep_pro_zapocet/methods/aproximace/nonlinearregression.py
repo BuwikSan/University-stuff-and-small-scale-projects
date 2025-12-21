@@ -14,7 +14,7 @@ def nonlinear_fit(p, a, am_min, am_max, b_min, b_max, am_step, b_step):
     best_am = 0.0
     best_b = 0.0
 
-    # Simulace vnořených cyklů z Go
+    # Simulace vnořených cyklů
     # Použijeme while, protože range v Pythonu neumí float kroky
     am = am_min
     while am <= am_max:

@@ -154,11 +154,45 @@ def příklad4():
         x = gauss_pivot(A, b)
         print(f"\nŘešení x:", x)
 
+def příklad5():
+    from methods.aproximace.nonlinearregression import nonlinear_fit
+    from methods.interpolace.lagrange import lagrange
+    p = [0.1, 0.2, 0.28, 0.41, 0.98, 1.39, 1.93, 2.75, 3.01, 3.51]
+    a = [0.089, 0.127, 0.144, 0.163, 0.189, 0.198, 0.206, 0.208, 0.209, 0.210]
+    plt.plot(p, a, 'o', label='Data body')
+    plt.show()
 
+    def analiticka_zavislost(p, a_m, b):
+        a = a_m*((b*p)/(1+b*p))
+        return a
+    
+    am_min, am_max, am_step = 0.1, 0.3, 0.0001
+    b_min, b_max, b_step = 0.1, 2.0, 0.001
+
+    a_m, b = nonlinear_fit(
+        p,
+        a,
+        am_min, am_max,
+        b_min, b_max, 
+        am_step, b_step
+    )
+    p
+    interpolovane = lagrange([i/100 for i in range(0, 360)], p, a)
+
+    import numpy as np
+    p_fit = np.linspace(min(p), max(p), 200)
+    a_fit = [analiticka_zavislost(val, a_m, b) for val in p_fit]
+
+    plt.plot(p, a, 'o', label='Data')
+    plt.plot(p_fit, a_fit, label='Analytický fit')
+    plt.plot([i/100 for i in range(0, 360)], interpolovane, label='Lagrangeova interpolace')
+    plt.legend()
+    plt.show()
 
 if __name__ == "__main__":
-    #příklad1()
-    #příklad2(10)
-    #příklad2(20)
-    #příklad3()
+    příklad1()
+    příklad2(10)
+    příklad2(20)
+    příklad3()
     příklad4()
+    příklad5()
