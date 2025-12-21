@@ -27,4 +27,5 @@ def simpson_rule(f, a, b, n):
 
     # Konečný vzorec: (h/3) * (f(a) + 4*f(x1) + 2*f(x2) + 4*f(x3) + ... + f(b))
     approximation = (h / 3) * total_sum
+
     return approximation

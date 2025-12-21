@@ -13,6 +13,7 @@ def bisection(f, a, b, tol, max_iter):
     """
     fa = f(a)
     fb = f(b)
+    print(f"Initial f(a)={fa}, f(b)={fb}")
 
     # Kontrola, zda v intervalu vůbec může být kořen (změna znaménka)
     if fa * fb > 0:

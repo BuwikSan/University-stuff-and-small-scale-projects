@@ -1,13 +1,5 @@
 import math
-
-def multiply_matrix_vector(a, x):
-    """Pomocná funkce pro součin matice a vektoru (MulVec)"""
-    n = len(a)
-    ax = [0.0] * n
-    for i in range(n):
-        for j in range(len(a[i])):
-            ax[i] += a[i][j] * x[j]
-    return ax
+from ..obecne_operace import multiply_matrix_vector
 
 def jacobi(a, b, max_iter, tol):
     """

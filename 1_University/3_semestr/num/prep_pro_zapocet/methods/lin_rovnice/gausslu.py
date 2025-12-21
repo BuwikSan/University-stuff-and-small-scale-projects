@@ -5,7 +5,7 @@ def gauss_lu(m):
     Provede LU rozklad matice m v místě (in-place).
     Vrací matici, kde pod diagonálou je matice L a na diagonále + nad ní je matice U.
     """
-    # Vytvoření hluboké kopie matice (odpovídá m.Copy() v Go)
+    
     # Abychom nezměnili původní matici, kterou jsme do funkce poslali
     a = [row[:] for row in m]
     
@@ -25,7 +25,6 @@ def gauss_lu(m):
             c = -a[i][k] / a[k][k]
             
             # Uložení prvku matice L (původně tam byla nula)
-            # Všimni si, že v Go máš a[i][k] = -c
             a[i][k] = -c
             
             # Úprava zbytku řádku pro matici U
