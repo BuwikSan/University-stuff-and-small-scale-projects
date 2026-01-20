@@ -198,7 +198,7 @@ def příklad5():
                 pruseciky.append((i, current_interp))
     
     print(pruseciky)
-
+    
         
 
 if __name__ == "__main__":

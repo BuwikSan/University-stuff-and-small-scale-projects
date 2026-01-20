@@ -29,7 +29,7 @@ map_border = pygame.Rect(5, 5, 1270, 710)
 
 # camp
 camp_background = pygame.Surface.convert(pygame.image.load(
-    fr"C:\Users\matbx\OneDrive\Dokumenty\Coding\Python\1.University\projekty\pygame_experiments\Mapa_RPG-P.V._v1.0.0.png"
+    fr"C:\GitHub\University-stuff-and-small-scale-projects\1_University\1_semestr\projekty\pygame_experiments\Mapa_RPG-P.V._v1.0.0.png"
     ))
 
 camp_stationary_hitboxes = []
@@ -58,7 +58,7 @@ camp_stationary_hitboxes.append(wall_2)
 BASE_PLAYER_SPEED = 200
 
 player_image = pygame.Surface.convert(pygame.image.load(
-    fr"C:\Users\matbx\OneDrive\Dokumenty\Coding\Python\1.University\projekty\pygame_experiments\tucnak_warm.png"
+    fr"C:\GitHub\University-stuff-and-small-scale-projects\1_University\1_semestr\projekty\pygame_experiments\tucnak_warm.png"
     ))
 
 player_hitbox = pygame.Rect(screen.get_width()/2, screen.get_height()/2, player_image.get_width(), player_image.get_height())
