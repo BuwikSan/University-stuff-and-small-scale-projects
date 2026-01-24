@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("oonv_project")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dbb52364bd74ddd38435f9448aaffae4ee8780fd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+655b7ad7e9a7ba8573fdc260083bfe5efaf9cbde")]
 [assembly: System.Reflection.AssemblyProductAttribute("oonv_project")]
 [assembly: System.Reflection.AssemblyTitleAttribute("oonv_project")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
