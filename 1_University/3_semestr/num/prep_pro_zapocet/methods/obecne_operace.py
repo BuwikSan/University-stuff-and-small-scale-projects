@@ -31,3 +31,13 @@ def make_matrix(řád, funkce_pro_doplnění_hodnot):
             řádek.append(funkce_pro_doplnění_hodnot(i, j))
         matice.append(řádek)
     return matice
+
+def make_linspace(l_bound, u_bound, n=-1):
+    if n == -1:
+        n = u_bound-l_bound
+
+    return [(l_bound + (u_bound-l_bound)/n * _) for _ in range(n)]
+
+
+if __name__ == "__main__":
+    print(make_linspace(2,6, 500))

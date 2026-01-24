@@ -2531,14 +2531,6 @@ INSERT INTO emp_pos_relation (fk_employee, fk_position, percentage) VALUES
 
 
 
-
-
-
-
-UPDATE employees e
-SET salary = COALESCE((SELECT SUM(p.salary * r.percentage / 100)
-FROM emp_pos_relation r
-JOIN positions p ON r.fk_position = p.id_position
-WHERE r.fk_employee = e.id_employee), 0);
-
+UPDATE employees
+SET salary = calculate_salary_value(id_employee);
 -- no fucking problema

@@ -25,7 +25,6 @@ def euler_step(f, x0, y0, h, n):
         y = y + h * f(x, y)
         x = x + h
         ys[i] = y
-        
     return ys
 
 # Příklad použití:

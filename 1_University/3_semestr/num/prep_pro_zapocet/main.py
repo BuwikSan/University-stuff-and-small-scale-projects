@@ -1,7 +1,3 @@
-# Numerická úloha: Najděte p takové, že
-# \int_0^p \left( \int_0^{2\pi} e^{-alpha x \sin x} dx \right) d\alpha = 1.31848
-# Použijeme Simpsonovo pravidlo pro integraci a bisekci pro hledání p
-
 import math
 from matplotlib import pyplot as plt
 
@@ -54,7 +50,7 @@ def příklad1():
 def příklad2(N):
     from methods.lin_rovnice.gausspivot import gauss_pivot
     from methods.interpolace.lagrange import lagrange
-    from methods.obecne_operace import make_matrix
+    from methods.obecne_operace import make_matrix, make_linspace
     # matrix = []
     # j = range(1, N+1)
     # for row in i:
@@ -65,7 +61,7 @@ def příklad2(N):
     i = range(1, N+1)
     
     gauss_result = gauss_pivot(matrix, [1]*(N))
-    lagrange_dimension_x = [(1 + (N-1)/1000 * _) for _ in range(1000)]
+    lagrange_dimension_x = make_linspace(1, N, 1000)
     interpolovane_hodnoty = lagrange(lagrange_dimension_x, i, gauss_result)
 
     #střední hodnoty pro jednotlivé dimenze
@@ -157,6 +153,7 @@ def příklad4():
 def příklad5():
     from methods.aproximace.nonlinearregression import nonlinear_fit
     from methods.interpolace.lagrange import lagrange
+    from methods.obecne_operace import make_linspace
     p = [0.1, 0.2, 0.28, 0.41, 0.98, 1.39, 1.93, 2.75, 3.01, 3.51]
     a = [0.089, 0.127, 0.144, 0.163, 0.189, 0.198, 0.206, 0.208, 0.209, 0.210]
     plt.plot(p, a, 'o', label='Data body')
@@ -179,8 +176,7 @@ def příklad5():
     p
     interpolovane = lagrange([i/100 for i in range(0, 360)], p, a)
 
-    import numpy as np
-    p_fit = np.linspace(min(p), max(p), 200)
+    p_fit = make_linspace(min(p), max(p), 200)
     a_fit = [analiticka_zavislost(val, a_m, b) for val in p_fit]
 
     plt.plot(p, a, 'o', label='Data')
@@ -189,10 +185,26 @@ def příklad5():
     plt.legend()
     plt.show()
 
+    for i in range(p_fit):
+        if i == 0:
+            last_aprox = a_fit[i]
+            last_interp = interpolovane[i]
+            pruseciky = []
+            pass
+        else:
+            current_aprox = a_fit[i]
+            current_interp = interpolovane[i]
+            if ((last_aprox > last_interp) and (current_aprox < current_interp)) or ((last_aprox < last_interp) and (current_aprox > current_interp)):
+                pruseciky.append((i, current_interp))
+    
+    print(pruseciky)
+    
+        
+
 if __name__ == "__main__":
     příklad1()
-    příklad2(10)
-    příklad2(20)
-    příklad3()
-    příklad4()
-    příklad5()
+    # příklad2(10)
+    # příklad2(20)
+    # příklad3()
+    # příklad4()
+    # příklad5()

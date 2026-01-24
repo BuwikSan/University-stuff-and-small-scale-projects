@@ -114,18 +114,7 @@ CREATE TABLE rooms (
 );
 
 
-DROP TABLE admin_emp;
-DROP TABLE emp_pos_relation;
-DROP TABLE employees;
-DROP TABLE subjects;
-DROP TABLE subject_species;
-DROP TABLE sex;
-DROP TABLE rooms;
-DROP TABLE functions;
-DROP TABLE buildings;
-DROP TABLE focus;
-DROP TABLE building_complexes;
-DROP TABLE positions;
+
 
 
 -- === INDEXY PRO OPTIMALIZACI VÝKONU ===
@@ -151,9 +140,12 @@ CREATE INDEX idx_emp_pos_position ON emp_pos_relation(fk_position);
 -- Složený index pro filtrování subjektů podle druhu a data vytvoření
 CREATE INDEX idx_subjects_species_date ON subjects(fk_specie, date_of_creation);
 
+
+
+
 CREATE UNIQUE INDEX idx_unique_employee_identity ON employees(name, phone_number);
 
-CREATE INDEX idx_pos_description_fulltext ON positions USING gin(to_tsvector('cs', description));
+CREATE INDEX idx_pos_description_fulltext ON positions USING gin(to_tsvector('en', description));
 
 -- Komentáře k indexům:
 -- 1. Indexy na jména (employees, subjects) zrychlují vyhledávání podle textu
@@ -162,3 +154,18 @@ CREATE INDEX idx_pos_description_fulltext ON positions USING gin(to_tsvector('cs
 
 
 -- no problema
+
+
+-- kdyby náhodou...
+DROP TABLE admin_emp;
+DROP TABLE emp_pos_relation;
+DROP TABLE employees;
+DROP TABLE subjects;
+DROP TABLE subject_species;
+DROP TABLE sex;
+DROP TABLE rooms;
+DROP TABLE functions;
+DROP TABLE buildings;
+DROP TABLE focus;
+DROP TABLE building_complexes;
+DROP TABLE positions;
