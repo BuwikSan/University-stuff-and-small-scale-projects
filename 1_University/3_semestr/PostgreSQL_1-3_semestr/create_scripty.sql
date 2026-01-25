@@ -44,7 +44,7 @@ CREATE TABLE buildings (
 );
 
 -- === Table: admin_emp ===
-CREATE TABLE admin_emp (
+CREATE TABLE emp_building (
     fk_building SERIAL,
     fk_employee SERIAL,
     PRIMARY KEY (fk_building, fk_employee),
@@ -157,7 +157,7 @@ CREATE INDEX idx_pos_description_fulltext ON positions USING gin(to_tsvector('en
 
 
 -- kdyby náhodou...
-DROP TABLE admin_emp;
+DROP TABLE emp_building;
 DROP TABLE emp_pos_relation;
 DROP TABLE employees;
 DROP TABLE subjects;

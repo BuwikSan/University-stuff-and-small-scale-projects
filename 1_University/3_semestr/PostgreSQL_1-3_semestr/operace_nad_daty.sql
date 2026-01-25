@@ -7,7 +7,7 @@ SELECT (
     (SELECT COUNT(*) FROM building_complexes) +
     (SELECT COUNT(*) FROM focus) +
     (SELECT COUNT(*) FROM buildings) +
-    (SELECT COUNT(*) FROM admin_emp) +
+    (SELECT COUNT(*) FROM emp_building) +
     (SELECT COUNT(*) FROM subject_species) +
     (SELECT COUNT(*) FROM subjects) +
     (SELECT COUNT(*) FROM positions) +
@@ -19,25 +19,28 @@ SELECT (
 
 
 -- 2a2 jeden SELECT bude obsahovat vnořený SELECT (select v selectu)-------------------------------------------------------------------------------------------------------
-CREATE VIEW nadprumerne_platy AS
-SELECT name, salary 
-FROM employees 
-WHERE salary > (SELECT AVG(salary) FROM employees);
+CREATE OR REPLACE VIEW nadprumerne_platy AS
+SELECT e.name AS employee_name, p.name AS position, e.salary AS salary
+FROM employees e
+LEFT JOIN emp_pos_relation er ON e.id_employee = er.fk_employee
+LEFT JOIN positions p ON p.id_position = er.fk_position
+WHERE e.salary > (SELECT AVG(salary) FROM employees);
 
 
 
 -- 2a3 jeden SELECT bude obsahovat nějakou analytickou funkci ---------------------------------------------------------------------------------------------------
-CREATE VIEW naklady_na_budovy AS
-SELECT 
-    b.name AS budova, 
+CREATE OR REPLACE VIEW naklady_na_budovy AS
+SELECT
+    b.name AS budova,
     SUM(e.salary) AS naklady_budova,
-    SUM(SUM(e.salary)) OVER () AS celkove_naklady_firmy,
-    ROUND((SUM(e.salary) / SUM(SUM(e.salary)) OVER ()) * 100, 2) AS procentualni_podil
+    -- Analytická funkce vypočítaná po seskupení (agregaci)
+    SUM(SUM(e.salary)) OVER() AS celkove_naklady_firmy,
+    -- Výpočet procenta
+    ROUND((SUM(e.salary) / SUM(SUM(e.salary)) OVER()) * 100, 2) AS procentualni_podil
 FROM employees e
-JOIN admin_emp ae ON e.id_employee = ae.fk_employee
+JOIN emp_building ae ON e.id_employee = ae.fk_employee
 JOIN buildings b ON ae.fk_building = b.id_building
 GROUP BY b.id_building, b.name;
-
 
 
 -- 2a4 jeden SELECT bude řešit rekurzi ------------------------------------------------------------------------------------------
@@ -96,14 +99,16 @@ FULL OUTER JOIN positions p ON er.fk_position = p.id_position
 WHERE e.name IS NULL OR p.name IS NULL;
 
 
-CREATE VIEW position_distribution AS
-SELECT fk_position, COUNT(*) AS employee_count
-FROM emp_pos_relation
-WHERE percentage = 100
-GROUP BY fk_position
+CREATE OR REPLACE VIEW position_distribution AS
+SELECT
+    p.name AS position_name,
+    COUNT(*) AS employee_count
+FROM emp_pos_relation er
+JOIN positions p ON er.fk_position = p.id_position -- Propojení tabulek přes cizí klíč
+WHERE er.percentage = 100
+GROUP BY p.name, er.fk_position -- Seskupení podle názvu (a ID pro jistotu) [cite: 21]
 HAVING COUNT(*) > 5
 ORDER BY employee_count DESC;
-
 
 
 
@@ -115,8 +120,17 @@ WITH RECURSIVE employee_tree AS (
     FROM employees
     WHERE id_employee = 1 -- CEO
     UNION ALL
-    SELECT e.id_employee, e.name, e.fk_supervisor, et.level + 1
+    SELECT e.id_employee, e.name, e.fk_supervisor, name, et.level + 1
     FROM employees e
     JOIN employee_tree et ON e.fk_supervisor = et.id_employee
 )
 SELECT * FROM employee_tree;
+
+
+
+-- procedure showcase --------------------------------------------------------------------------------
+SELECT name, salary FROM positions WHERE salary < 110000;
+
+CALL adjust_salaries_by_cursor(110000, 5);
+
+SELECT name, salary FROM positions WHERE salary < 110000;

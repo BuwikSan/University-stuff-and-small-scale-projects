@@ -106,6 +106,8 @@ BEGIN
         RAISE NOTICE 'V průběhu došlo k chybám -> vracím změny (ROLLBACK).';
         ROLLBACK; -- Zde je to bezpečné
     ELSE
+        UPDATE employees
+        SET salary = calculate_salary_value(id_employee);
         RAISE NOTICE 'Vše OK -> potvrzuji změny (COMMIT).';
         COMMIT;
     END IF;
