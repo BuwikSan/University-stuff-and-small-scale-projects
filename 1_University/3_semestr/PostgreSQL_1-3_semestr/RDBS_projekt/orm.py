@@ -5,12 +5,12 @@ from datetime import date
 import csv
 
 # 1. Připojení k databázi
-engine = create_engine('postgresql://postgres:Coconut12@localhost:5432/postgres')
+engine = create_engine('postgresql://postgres:*****@localhost:5432/postgres')
 Base = declarative_base()
 
 # 2. Mapování tabulek
 
-# Tabulka druhů (podle tvého druhého screenshotu)
+# Tabulka druhů
 class Specie(Base):
     __tablename__ = 'species'
     id_specie = Column(Integer, primary_key=True)
@@ -19,9 +19,9 @@ class Specie(Base):
     life_expectancy = Column(Integer)
     
     # Propojení na subjekty
-    subjects = relationship("subjects", back_populates="specie")
+    subjects = relationship("Subject", back_populates="specie")
 
-# Tabulka subjektů (podle tvého prvního screenshotu)
+# Tabulka subjektů
 class Subject(Base):
     __tablename__ = 'subjects'
     id_subject = Column(Integer, primary_key=True)
@@ -31,7 +31,7 @@ class Subject(Base):
     fk_sex = Column(Integer)
     
     # Propojení na druh
-    species = relationship("species", back_populates="subjects")
+    specie = relationship("Specie", back_populates="subjects")
 
     # V třídě Subject:
     def get_life_progress(self):
@@ -59,12 +59,10 @@ class Employee(Base):
 
 
 
-# 3. Mapování tvého analytického VIEW
+# 3. Mapování analytického VIEW
 class BuildingStats(Base):
     __tablename__ = 'naklady_na_budovy'
-    # Pokud se sloupec ve VIEW jmenuje třeba 'budova', musí to být tady taky tak!
-    # 'primary_key=True' tu musí být jen pro SQLAlchemy, i když ve VIEW není.
-    nazev = Column('budova', String, primary_key=True)  # Zkus 'budova' místo 'nazev_budovy'
+    nazev = Column('budova', String, primary_key=True)
     naklady = Column('naklady_budova', Numeric)
     podil = Column('procentualni_podil', Numeric)
 
@@ -81,7 +79,7 @@ def main():
         vsechny_subjekty = session.query(Subject).all()
 
         for s in vsechny_subjekty:
-            # Přístup k datům z druhé tabulky přes tečku (s.specie.full_name)
+            # Přístup k datům z druhé tabulky (s.specie.full_name)
             print(f"{s.name:<15} | {s.specie.full_name:<30} | {s.specie.life_expectancy} let")
 
         # --- VÝPIS GENETICKÝCH PRODUKTŮ ---
@@ -115,7 +113,6 @@ def main():
         total_payroll = 0
         for emp in vysledek:
             total_payroll += float(emp.salary)
-            # Tady používáme tu naši novou property 'estimated_tax'
             print(f"{emp.name:<25} | {float(emp.salary):>10.2f} Kč | {emp.estimated_tax:>10.2f} Kč")
 
         # --- ORM Statistika---
