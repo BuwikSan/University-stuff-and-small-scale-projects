@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, Column, Integer, String, Numeric, Date, ForeignKey
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship, joinedload
 from datetime import date
 
 import csv
@@ -12,26 +12,26 @@ Base = declarative_base()
 
 # Tabulka druhů (podle tvého druhého screenshotu)
 class Specie(Base):
-    __tablename__ = 'species'
+    __tablename__ = 'subject_species'
     id_specie = Column(Integer, primary_key=True)
     full_name = Column(String)
     adulthood_year = Column(Integer)
     life_expectancy = Column(Integer)
     
     # Propojení na subjekty
-    subjects = relationship("subjects", back_populates="specie")
+    subjects = relationship("Subject", back_populates="specie")
 
 # Tabulka subjektů (podle tvého prvního screenshotu)
 class Subject(Base):
     __tablename__ = 'subjects'
     id_subject = Column(Integer, primary_key=True)
     name = Column(String)
-    date_of_creation = Column(Date)
-    fk_specie = Column(Integer, ForeignKey('species.id_specie'))
+    date_of_creation = Column(Date) # Assuming this is a Date object
+    fk_specie = Column(Integer, ForeignKey('subject_species.id_specie'))
     fk_sex = Column(Integer)
     
     # Propojení na druh
-    species = relationship("species", back_populates="subjects")
+    specie = relationship("Specie", back_populates="subjects")
 
     # V třídě Subject:
     def get_life_progress(self):
@@ -78,7 +78,7 @@ session = Session()
 def main():
     try:
 
-        vsechny_subjekty = session.query(Subject).all()
+        vsechny_subjekty = session.query(Subject).options(joinedload(Subject.specie)).all()
 
         for s in vsechny_subjekty:
             # Přístup k datům z druhé tabulky přes tečku (s.specie.full_name)
@@ -88,7 +88,7 @@ def main():
         print(f"{'SUBJEKT':<15} | {'DRUH SAPIENS':<25} | {'DOŽITÍ'}")
         print("-" * 55)
 
-        subjekty = session.query(Subject).all()
+        subjekty = session.query(Subject).options(joinedload(Subject.specie)).all()
         for s in subjekty:
             # Díky relationship() se Python sám podívá do tabulky species!
             print(f"{s.name:<15} | {s.specie.full_name:<25} | {s.specie.life_expectancy} let")
@@ -100,7 +100,7 @@ def main():
             print(f"Budova: {s.nazev.ljust(20)} | Náklady: {str(s.naklady).rjust(10)} Kč | Podíl: {s.podil}%")
 
         # --- Výpis zaměstnanců ---
-        print("\n=== ZAMĚSTNANCI S PLATEM NAD 160 000 ===")
+        print("\n=== ZAMĚSTNANCI S PLATEM NAD 160 000 ===") # Removed joinedload as Employee has no relationships defined
         vysledek = session.query(Employee).filter(Employee.salary > 160000).all()
         for emp in vysledek:
             # Malý grafický bonus pro efekt
