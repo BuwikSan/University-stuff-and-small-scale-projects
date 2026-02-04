@@ -88,10 +88,6 @@ def main():
         print(f"{'SUBJEKT':<15} | {'DRUH SAPIENS':<25} | {'DOŽITÍ'}")
         print("-" * 55)
 
-        subjekty = session.query(Subject).options(joinedload(Subject.specie)).all()
-        for s in subjekty:
-            # Díky relationship() se Python sám podívá do tabulky species!
-            print(f"{s.name:<15} | {s.specie.full_name:<25} | {s.specie.life_expectancy} let")
 
         # --- Analytika z VIEW ---
         print("\n=== TOP 5 NEJDRAŽŠÍCH BUDOV (Data z VIEW) ===")
@@ -115,8 +111,6 @@ def main():
         total_payroll = 0
         for emp in vysledek:
             total_payroll += float(emp.salary)
-            # Tady používáme tu naši novou property 'estimated_tax'
-            print(f"{emp.name:<25} | {float(emp.salary):>10.2f} Kč | {emp.estimated_tax:>10.2f} Kč")
 
         # --- ORM Statistika---
         avg_salary = total_payroll / len(vysledek) if vysledek else 0
