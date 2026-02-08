@@ -44,11 +44,40 @@ GROUP BY b.id_building, b.name;
 
 
 -- 2a4 jeden SELECT bude řešit rekurzi ------------------------------------------------------------------------------------------
-CREATE VIEW serazeni_podle_platu_rozdeleno_pohlavim AS
+
+CREATE VIEW employee_hierarchy AS
+WITH RECURSIVE employee_tree AS (
+    -- Anchor: Add a placeholder for supervisor_name because the CEO has no supervisor
+    SELECT 
+        id_employee, 
+        name, 
+        fk_supervisor, 
+        'No Supervisor'::text as supervisor_name, -- Placeholder to match column count
+        1 as level
+    FROM employees
+    WHERE id_employee = 1
+    
+    UNION ALL
+    
+    -- Recursive: Select et.name (the supervisor's name from the previous level)
+    SELECT 
+        e.id_employee, 
+        e.name, 
+        e.fk_supervisor, 
+        et.name, -- This resolves the ambiguity (et.name is the supervisor)
+        et.level + 1
+    FROM employees e
+    JOIN employee_tree et ON e.fk_supervisor = et.id_employee
+)
+SELECT * FROM employee_tree;
+
+
 -- Analytická funkce (Pořadí zaměstnanců podle platu v rámci pohlaví)
-SELECT name, salary, fk_sex,
+CREATE VIEW serazeni_podle_platu_rozdeleno_pohlavim AS
+SELECT name, salary, sex.text_form as sex,
        RANK() OVER (PARTITION BY fk_sex ORDER BY salary DESC) as salary_rank
 FROM employees
+LEFT JOIN sex ON employees.fk_sex = sex.id_sex
 WHERE salary IS NOT NULL;
 
 
@@ -70,16 +99,17 @@ LEFT JOIN positions p ON er.fk_position = p.id_position
 WHERE er.percentage IS NULL;
 
 
-CREATE VIEW multi_position_employees AS
-WITH employee_counts AS (
-    SELECT e.id_employee, e.name, COUNT(er.fk_position) AS position_count
-    FROM employees e
-    JOIN emp_pos_relation er ON e.id_employee = er.fk_employee
-    GROUP BY e.id_employee, e.name
-)
-SELECT *
-FROM employee_counts
-WHERE position_count > 1;
+CREATE OR REPLACE VIEW multi_position_employees AS
+SELECT
+    e.id_employee,
+    e.name,
+    COUNT(er.fk_position) AS position_count,
+    STRING_AGG(p.name, ', ') AS all_positions -- Spojí názvy: "Manager, Vedoucí, Uklízeč"
+FROM employees e
+JOIN emp_pos_relation er ON e.id_employee = er.fk_employee
+JOIN positions p ON er.fk_position = p.id_position
+GROUP BY e.id_employee, e.name
+HAVING COUNT(er.fk_position) > 1; -- Filtrujeme rovnou zde pomocí HAVING
 
 
 CREATE VIEW gender_salary_comparison AS
@@ -111,26 +141,81 @@ HAVING COUNT(*) > 5
 ORDER BY employee_count DESC;
 
 
+-- test indexování -----
+
+DROP INDEX idx_unique_employee_identity;
+DROP INDEX idx_employees_name;
+
+EXPLAIN ANALYZE
+SELECT * FROM employees
+WHERE name = 'Jan Novák';
+
+CREATE INDEX idx_employees_name ON employees(name);
+CREATE UNIQUE INDEX idx_unique_employee_identity ON employees(name, phone_number);
+
+EXPLAIN ANALYZE
+SELECT * FROM employees
+WHERE name = 'Jan Novák';
 
 
+DROP INDEX idx_subjects_species;
+DROP INDEX idx_subjects_species_date;
 
-CREATE VIEW employee_hierarchy AS
-WITH RECURSIVE employee_tree AS (
-    SELECT id_employee, name, fk_supervisor, 1 as level
-    FROM employees
-    WHERE id_employee = 1 -- CEO
-    UNION ALL
-    SELECT e.id_employee, e.name, e.fk_supervisor, name, et.level + 1
-    FROM employees e
-    JOIN employee_tree et ON e.fk_supervisor = et.id_employee
-)
-SELECT * FROM employee_tree;
+EXPLAIN ANALYZE
+SELECT * FROM subjects 
+WHERE fk_specie = 1 
+  AND fk_sex = 2;
+
+EXPLAIN ANALYZE
+SELECT * FROM subjects 
+WHERE fk_specie = 5 
+  AND date_of_creation > '2023-01-01';
+
+CREATE INDEX idx_subjects_species ON subjects(fk_specie);
+CREATE INDEX idx_subjects_species_date ON subjects(fk_specie, date_of_creation);
+
+EXPLAIN ANALYZE
+SELECT * FROM subjects 
+WHERE fk_specie = 1 
+  AND fk_sex = 2;
+
+EXPLAIN ANALYZE
+SELECT * FROM subjects 
+WHERE fk_specie = 5 
+  AND date_of_creation > '2023-01-01';
+  
+
+DROP INDEX idx_unique_employee_identity
+
+EXPLAIN ANALYZE
+SELECT id_employee 
+FROM employees 
+WHERE name = 'Petr Svoboda' 
+  AND phone_number = '+420777666555';
+
+CREATE UNIQUE INDEX idx_unique_employee_identity ON employees(name, phone_number);
+
+EXPLAIN ANALYZE
+SELECT id_employee 
+FROM employees 
+WHERE name = 'Petr Svoboda' 
+  AND phone_number = '+420777666555';
+
 
 
 
 -- procedure showcase --------------------------------------------------------------------------------
+CREATE VIEW platy_pred_valorizaci
 SELECT name, salary FROM positions WHERE salary < 110000;
 
 CALL adjust_salaries_by_cursor(110000, 5);
 
+CREATE VIEW platy_po_valorizaci
 SELECT name, salary FROM positions WHERE salary < 110000;
+
+CALL adjust_salaries_by_cursor(110000, -4.7619);
+
+CREATE VIEW platy_po_reverzní_valorizaci
+SELECT name, salary FROM positions WHERE salary < 110000;
+
+

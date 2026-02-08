@@ -57,7 +57,6 @@ EXECUTE FUNCTION trigger_recalculate_logic();
 
 
 
-
 -- e) + g) PROCEDURE: Cursor, Handler, Transaction   !!!!!!!!!!!!!!!ukázat že funguje
 CREATE OR REPLACE PROCEDURE adjust_salaries_by_cursor(min_threshold DECIMAL, increase_rate DECIMAL)
 LANGUAGE plpgsql AS $$
