@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - KrizeMapa{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h1>Dashboard</h1>
+    <p class="subtitle">Přehled aktuálních krizových situací</p>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_events }}</div>
+            <div class="stat-label">Celkem hlášených krizí</div>
+        </div>
+        <div class="stat-card critical">
+            <div class="stat-number">{{ today_events }}</div>
+            <div class="stat-label">Dnes hlášeno</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Status</div>
+            <div class="status-badge online">✓ Online</div>
+        </div>
+    </div>
+
+    <!-- Latest Events -->
+    <section class="section">
+        <h2>Poslední hlášení</h2>
+        {% if latest_events %}
+            <div class="events-list">
+                {% for event in latest_events %}
+                <div class="event-card severity-{{ event.severity }}">
+                    <div class="event-header">
+                        <h3>{{ event.title }}</h3>
+                        <span class="severity-badge">Stupeň {{ event.severity }}/5</span>
+                    </div>
+                    <p class="event-type">{{ event.event_type }}</p>
+                    <p class="event-location">{{ event.location }}</p>
+                    <p class="event-time">{{ event.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+                    <a href="{{ url_for('events.view_event', event_id=event._id) }}" class="link-more">Více detailů →</a>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">Žádné hlášené krize.</p>
+        {% endif %}
+    </section>
+
+    <!-- Action Buttons -->
+    <section class="section actions">
+        <a href="{{ url_for('events.submit_event') }}" class="btn btn-primary btn-large">
+            ➕ Hlásit novou krizi
+        </a>
+        <a href="{{ url_for('events.view_all') }}" class="btn btn-secondary btn-large">
+            📊 Zobrazit všechny krize
+        </a>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Refresh stats každých 30 sekund
+    async function refreshStats() {
+        try {
+            const response = await fetch('{{ url_for("events.api_stats") }}');
+            const data = await response.json();
+            console.log('Stats:', data);
+            // Lze later updatovat UI dynamicky
+        } catch (e) {
+            console.error('Stats refresh error:', e);
+        }
+    }
+    
+    // Počáteční refresh + interval
+    setInterval(refreshStats, 30000);
+</script>
+{% endblock %}

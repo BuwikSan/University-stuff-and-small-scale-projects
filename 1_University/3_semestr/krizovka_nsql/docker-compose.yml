@@ -1,0 +1,58 @@
+﻿
+services:
+  web:
+    build: .
+    container_name: krizemap-web
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: production
+      FLASK_APP: run.py
+      FLASK_HOST: 0.0.0.0
+      REDIS_URL: redis://redis:6379/0
+      MONGO_URI: mongodb://admin:admin@mongodb:27017/krizove_udalosti?authSource=admin
+    depends_on:
+      - redis
+      - mongodb
+    volumes:
+      - ./app:/app/app
+    networks:
+      - krizemap-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: krizemap-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - krizemap-network
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:7
+    container_name: krizemap-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_INITDB_DATABASE: krizove_udalosti
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    networks:
+      - krizemap-network
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+  mongo-data:
+  mongo-config:
+
+networks:
+  krizemap-network:
+    driver: bridge

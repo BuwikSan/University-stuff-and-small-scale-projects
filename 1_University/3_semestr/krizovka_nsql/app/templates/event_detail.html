@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Detail - KrizeMapa{% endblock %}
+
+{% block content %}
+<div class="event-detail-view">
+    <div class="event-detail-container">
+        <div class="event-detail-header">
+            <h1>{{ event.title }}</h1>
+            <div class="event-meta">
+                <span class="badge badge-type">{{ event.event_type|replace('_', ' ')|title }}</span>
+                <span class="badge badge-severity severity-{{ event.severity }}">
+                    Stupeň {{ event.severity }}/5
+                </span>
+            </div>
+        </div>
+
+        <div class="event-detail-body">
+            <section>
+                <h3>Popis situace</h3>
+                <p>{{ event.description }}</p>
+            </section>
+
+            <section>
+                <h3>Lokace</h3>
+                <p>{{ event.location }}</p>
+                {% if event.latitude and event.longitude %}
+                <p class="gps-coords">
+                    GPS: {{ event.latitude }}, {{ event.longitude }}
+                </p>
+                {% endif %}
+            </section>
+
+            <section>
+                <h3>ℹInformace</h3>
+                <table class="info-table">
+                    <tr>
+                        <td><strong>Typ krize:</strong></td>
+                        <td>{{ event.event_type|replace('_', ' ')|title }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stupeň závažnosti:</strong></td>
+                        <td>
+                            <span class="severity-bar">
+                                {% for i in range(event.severity) %}
+                                    <span class="filled">■</span>
+                                {% endfor %}
+                                {% for i in range(5 - event.severity) %}
+                                    <span class="empty">□</span>
+                                {% endfor %}
+                            </span>
+                            {{ event.severity }}/5
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hlášeno:</strong></td>
+                        <td>{{ event.created_at.strftime('%d.%m.%Y v %H:%M:%S') }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ID:</strong></td>
+                        <td class="monospace">{{ event._id }}</td>
+                    </tr>
+                </table>
+            </section>
+        </div>
+
+        <div class="event-detail-footer">
+            <a href="{{ url_for('events.view_all', page=page) }}" class="btn btn-secondary">
+                ← Zpět na seznam
+            </a>
+            <form method="POST" action="{{ url_for('events.delete_event', event_id=event._id) }}" style="display:inline;">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Opravdu smazat tuto krizi?')">
+                    🗑️ Smazat
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

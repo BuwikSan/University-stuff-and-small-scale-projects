@@ -123,7 +123,6 @@ CREATE INDEX idx_employees_name ON employees(name);
 
 -- Index pro vyhledávání subjektů podle druhu a pohlaví (pro filtrování)
 CREATE INDEX idx_subjects_species ON subjects(fk_specie);
-CREATE INDEX idx_subjects_sex ON subjects(fk_sex);
 CREATE INDEX idx_subjects_name ON subjects(name);
 
 -- Index pro vyhledávání budov podle komplexu (hierarchické vyhledávání)

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Chyba - KrizeMapa{% endblock %}
+
+{% block content %}
+<div class="error-view">
+    <div class="error-container">
+        <h1>❌ Chyba</h1>
+        <p>{{ message }}</p>
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary btn-large">
+            ← Zpět na dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

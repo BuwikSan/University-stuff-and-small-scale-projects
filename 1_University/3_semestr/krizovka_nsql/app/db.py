@@ -1,0 +1,290 @@
+"""
+Database layer - MongoDB + Redis
+"""
+from typing import List, Dict, Any, Optional
+from datetime import datetime
+import json
+import logging
+
+from pymongo import MongoClient, DESCENDING
+from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
+import redis
+
+from .models import CrisisEvent
+
+logger = logging.getLogger(__name__)
+
+
+class DatabaseManager:
+    """Správce databází - MongoDB (persistent) + Redis (cache)"""
+    
+    def __init__(self, mongo_uri: str, redis_url: str, db_name: str):
+        self.mongo_uri = mongo_uri
+        self.redis_url = redis_url
+        self.db_name = db_name
+        
+        # Lazy load - připojit až když je potřeba
+        self._mongo_client: Optional[MongoClient] = None
+        self._redis_client: Optional[redis.Redis] = None
+        self._db = None
+    
+    @property
+    def mongo(self) -> MongoClient:
+        """Lazy-load MongoDB connection"""
+        if self._mongo_client is None:
+            try:
+                self._mongo_client = MongoClient(self.mongo_uri, serverSelectionTimeoutMS=5000)
+                # Test connection
+                self._mongo_client.server_info()
+                self._db = self._mongo_client[self.db_name]
+                logger.info(f"✓ Připojen k MongoDB: {self.db_name}")
+            except (ConnectionFailure, ServerSelectionTimeoutError) as e:
+                logger.error(f"✗ MongoDB spojení selhalo: {e}")
+                self._mongo_client = None
+                raise
+        return self._mongo_client
+    
+    @property
+    def redis(self) -> redis.Redis:
+        """Lazy-load Redis connection"""
+        if self._redis_client is None:
+            try:
+                self._redis_client = redis.from_url(self.redis_url, decode_responses=True)
+                # Test connection
+                self._redis_client.ping()
+                logger.info("✓ Připojen k Redis")
+            except Exception as e:
+                logger.error(f"✗ Redis spojení selhalo: {e}")
+                self._redis_client = None
+                raise
+        return self._redis_client
+    
+    @property
+    def db(self):
+        """Přístup k MongoDB databázi"""
+        if self._db is None:
+            _ = self.mongo  # Trigger lazy load
+        return self._db
+    
+    def get_collection(self, name: str):
+        """Vrať MongoDB kolekci"""
+        return self.db[name]
+    
+    # ==================== CRISIS EVENTS ====================
+    
+    def create_event(self, event: CrisisEvent) -> str:
+        """
+        Vytvoř novou crisis event.
+        Vrátí event ID.
+        """
+        try:
+            collection = self.get_collection("events")
+            event_dict = event.to_dict()
+            result = collection.insert_one(event_dict)
+            
+            # Invaliduj cache
+            self._invalidate_events_cache()
+            
+            logger.info(f"✓ Event vytořen: {result.inserted_id}")
+            return str(result.inserted_id)
+        except Exception as e:
+            logger.error(f"✗ Chyba při vytváření eventu: {e}")
+            raise
+    
+    def get_event(self, event_id: str) -> Optional[CrisisEvent]:
+        """Vrať event podle ID"""
+        try:
+            from bson.objectid import ObjectId
+            collection = self.get_collection("events")
+            event_dict = collection.find_one({"_id": ObjectId(event_id)})
+            if event_dict:
+                return CrisisEvent.from_dict(event_dict)
+            return None
+        except Exception as e:
+            logger.error(f"✗ Chyba při načítání eventu: {e}")
+            return None
+    
+    def get_all_events(self, limit: int = 100, skip: int = 0) -> List[CrisisEvent]:
+        """
+        Vrať všechny eventy seřazené podle času (nejnovější první).
+        Cache se používá jen když není pagination (limit=100, skip=0).
+        """
+        # Zkus cache jen pokud se nepoužívá pagination
+        cache_key = "events:all"
+        if limit == 100 and skip == 0:
+            try:
+                cached = self.redis.get(cache_key)
+                if cached:
+                    data = json.loads(cached)
+                    return [CrisisEvent.from_dict(d) for d in data]
+            except Exception as e:
+                logger.warning(f"Cache read failed: {e}")
+        
+        # Pokud cache selže nebo je pagination, jdi do MongoDB
+        try:
+            collection = self.get_collection("events")
+            events_data = list(
+                collection.find()
+                .sort("created_at", DESCENDING)
+                .limit(limit)
+                .skip(skip)
+            )
+            
+            events = [CrisisEvent.from_dict(d) for d in events_data]
+            
+            # Ulož do cache jen bez pagination
+            if limit == 100 and skip == 0:
+                try:
+                    self.redis.setex(
+                        cache_key,
+                        300,
+                        json.dumps([e.to_dict() for e in events], default=str)
+                    )
+                except Exception as e:
+                    logger.warning(f"Cache write failed: {e}")
+            
+            return events
+        except Exception as e:
+            logger.error(f"✗ Chyba při načítání eventů: {e}")
+            return []
+    
+    def get_events_by_type(self, event_type: str, limit: int = 50) -> List[CrisisEvent]:
+        """Vrať eventy určitého typu"""
+        try:
+            collection = self.get_collection("events")
+            events_data = list(
+                collection.find({"type": event_type})
+                .sort("created_at", DESCENDING)
+                .limit(limit)
+            )
+            return [CrisisEvent.from_dict(d) for d in events_data]
+        except Exception as e:
+            logger.error(f"✗ Chyba při filtrování eventů: {e}")
+            return []
+    
+    def get_events_by_severity(self, min_severity: int = 1, max_severity: int = 5) -> List[CrisisEvent]:
+        """Vrať eventy určitého stupně závažnosti"""
+        try:
+            collection = self.get_collection("events")
+            events_data = list(
+                collection.find(
+                    {"severity": {"$gte": min_severity, "$lte": max_severity}}
+                )
+                .sort("created_at", DESCENDING)
+            )
+            return [CrisisEvent.from_dict(d) for d in events_data]
+        except Exception as e:
+            logger.error(f"✗ Chyba při filtrování eventů: {e}")
+            return []
+    
+    def count_events(self) -> int:
+        """Vrať počet všech eventů"""
+        try:
+            # Zkus cache
+            cache_key = "events:count"
+            try:
+                cached = self.redis.get(cache_key)
+                if cached:
+                    return int(cached)
+            except:
+                pass
+            
+            collection = self.get_collection("events")
+            count = collection.count_documents({})
+            
+            # Cache na 5 minut
+            try:
+                self.redis.setex(cache_key, 300, str(count))
+            except:
+                pass
+            
+            return count
+        except Exception as e:
+            logger.error(f"✗ Chyba při počítání eventů: {e}")
+            return 0
+    
+    def count_today_events(self) -> int:
+        """Vrať počet eventů hlášených dnes"""
+        try:
+            from datetime import datetime, timedelta
+            
+            # Zkus cache
+            cache_key = "events:today"
+            try:
+                cached = self.redis.get(cache_key)
+                if cached:
+                    return int(cached)
+            except:
+                pass
+            
+            # Spočítej kríze od půlnoci dneška
+            today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            today_end = today_start + timedelta(days=1)
+            
+            collection = self.get_collection("events")
+            count = collection.count_documents({
+                "created_at": {
+                    "$gte": today_start,
+                    "$lt": today_end
+                }
+            })
+            
+            # Cache na 5 minut
+            try:
+                self.redis.setex(cache_key, 300, str(count))
+            except:
+                pass
+            
+            return count
+        except Exception as e:
+            logger.error(f"✗ Chyba při počítání dnešních eventů: {e}")
+            return 0
+    
+    def delete_event(self, event_id: str) -> bool:
+        """Smaž event"""
+        try:
+            from bson.objectid import ObjectId
+            collection = self.get_collection("events")
+            result = collection.delete_one({"_id": ObjectId(event_id)})
+            if result.deleted_count > 0:
+                self._invalidate_events_cache()
+                logger.info(f"✓ Event smazán: {event_id}")
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"✗ Chyba při smazání eventu: {e}")
+            return False
+    
+    def _invalidate_events_cache(self):
+        """Vynuluj relevantní cache klíče"""
+        try:
+            self.redis.delete("events:all", "events:count")
+        except Exception as e:
+            logger.warning(f"Cache invalidation failed: {e}")
+    
+    # ==================== HEALTH CHECK ====================
+    
+    def health_check(self) -> Dict[str, bool]:
+        """Ověř připojení ke všem databázím"""
+        result = {"mongo": False, "redis": False}
+        
+        try:
+            self.mongo.server_info()
+            result["mongo"] = True
+        except:
+            pass
+        
+        try:
+            self.redis.ping()
+            result["redis"] = True
+        except:
+            pass
+        
+        return result
+    
+    def close(self):
+        """Uzavři všechna připojení"""
+        if self._mongo_client:
+            self._mongo_client.close()
+        if self._redis_client:
+            self._redis_client.close()

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Všechny krize - KrizeMapa{% endblock %}
+
+{% block content %}
+<div class="events-view">
+    <h1>📊 Všechny hlášené krize</h1>
+    <p class="subtitle">Celkem: {{ total }} hlášení</p>
+
+    {% if events %}
+        <div class="events-table-container">
+            <table class="events-table">
+                <thead>
+                    <tr>
+                        <th>Název</th>
+                        <th>Typ</th>
+                        <th>Lokace</th>
+                        <th>Stupeň</th>
+                        <th>Čas hlášení</th>
+                        <th>Akce</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr class="severity-{{ event.severity }}">
+                        <td class="event-title">
+                            <strong>{{ event.title }}</strong>
+                        </td>
+                        <td>{{ event.event_type|replace('_', ' ')|title }}</td>
+                        <td class="location">{{ event.location }}</td>
+                        <td class="severity">
+                            <span class="severity-badge">{{ event.severity }}/5</span>
+                        </td>
+                        <td class="time">{{ event.created_at.strftime('%d.%m. %H:%M') }}</td>
+                        <td class="actions">
+                            <a href="{{ url_for('events.view_event', event_id=event._id, page=page) }}" class="btn-small">Detail</a>
+                            <form method="POST" action="{{ url_for('events.delete_event', event_id=event._id) }}" style="display:inline;">
+                                <button type="submit" class="btn-small btn-danger" onclick="return confirm('Opravdu smazat?')">Smazat</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="{{ url_for('events.view_all', page=page-1) }}" class="btn btn-secondary">← Předchozí</a>
+            {% endif %}
+            
+            <span class="page-info">Strana {{ page }}</span>
+            
+            {% if has_next %}
+                <a href="{{ url_for('events.view_all', page=page+1) }}" class="btn btn-secondary">Další →</a>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <h2>Zatím žádné krize nehlášeny</h2>
+            <p>Buď první, kdo hlásí krizi!</p>
+            <a href="{{ url_for('events.submit_event') }}" class="btn btn-primary btn-large">
+                ➕ Hlásit krizi
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
