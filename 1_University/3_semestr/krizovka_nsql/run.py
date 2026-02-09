@@ -17,10 +17,10 @@ if __name__ == "__main__":
     
     print(f"""
     ╔════════════════════════════════════════╗
-    ║     🚨 KrizeMapa - Crisis Manager      ║
+    ║       KrizeMapa - Crisis Manager       ║
     ║        Flask + MongoDB + Redis         ║
     ║                                        ║
-    ║  Environment: {env.upper():<27}║
+    ║  Environment: {env.upper():<27}        ║
     ╚════════════════════════════════════════╝
     """)
     
@@ -32,8 +32,8 @@ if __name__ == "__main__":
     host = os.environ.get("FLASK_HOST", "localhost")
     port = int(os.environ.get("FLASK_PORT", "5000"))
     
-    print(f"\n🌍 Server running na http://{host}:{port}")
-    print(f"   Debug mode: {'ON' if debug else 'OFF'}\n")
+    print(f"\n Server running na http://{host}:{port}")
+    print(f" Debug mode: {'ON' if debug else 'OFF'}\n")
     
     try:
         app.run(host=host, port=port, debug=debug)

@@ -72,6 +72,22 @@ class DatabaseManager:
     
     # ==================== CRISIS EVENTS ====================
     
+    def clear_all_events(self) -> int:
+        """Smaž VŠECHNY eventy z databáze. Vrátí počet smazaných."""
+        try:
+            collection = self.get_collection("events")
+            result = collection.delete_many({})
+            
+            # Invaliduj všechny cache
+            self._invalidate_events_cache()
+            self.redis.delete("events:today")
+            
+            logger.info(f"✓ Smazáno {result.deleted_count} eventů z databáze")
+            return result.deleted_count
+        except Exception as e:
+            logger.error(f"✗ Chyba při mazání eventů: {e}")
+            raise
+    
     def create_event(self, event: CrisisEvent) -> str:
         """
         Vytvoř novou crisis event.
@@ -104,23 +120,25 @@ class DatabaseManager:
             logger.error(f"✗ Chyba při načítání eventu: {e}")
             return None
     
-    def get_all_events(self, limit: int = 100, skip: int = 0) -> List[CrisisEvent]:
+    def get_all_events(self, limit: int = 50, skip: int = 0) -> List[CrisisEvent]:
         """
         Vrať všechny eventy seřazené podle času (nejnovější první).
-        Cache se používá jen když není pagination (limit=100, skip=0).
+        Cache se používá pro všechny dotazy s limit <= 50.
         """
-        # Zkus cache jen pokud se nepoužívá pagination
+        # Zkus cache pro rozumné limity
         cache_key = "events:all"
-        if limit == 100 and skip == 0:
+        if limit <= 50:
             try:
                 cached = self.redis.get(cache_key)
                 if cached:
                     data = json.loads(cached)
-                    return [CrisisEvent.from_dict(d) for d in data]
+                    all_events = [CrisisEvent.from_dict(d) for d in data]
+                    # Slicuj v Pythonu podle skip/limit
+                    return all_events[skip:skip+limit]
             except Exception as e:
                 logger.warning(f"Cache read failed: {e}")
         
-        # Pokud cache selže nebo je pagination, jdi do MongoDB
+        # Pokud cache selže nebo je velký limit, jdi do MongoDB
         try:
             collection = self.get_collection("events")
             events_data = list(
@@ -132,13 +150,17 @@ class DatabaseManager:
             
             events = [CrisisEvent.from_dict(d) for d in events_data]
             
-            # Ulož do cache jen bez pagination
-            if limit == 100 and skip == 0:
+            # Ulož VŠECHNY eventy do cache (bez limit/skip)
+            if limit <= 50 and skip == 0:
                 try:
+                    all_events_data = list(
+                        collection.find()
+                        .sort("created_at", DESCENDING)
+                    )
                     self.redis.setex(
                         cache_key,
                         300,
-                        json.dumps([e.to_dict() for e in events], default=str)
+                        json.dumps([e.to_dict() for e in [CrisisEvent.from_dict(d) for d in all_events_data]], default=str)
                     )
                 except Exception as e:
                     logger.warning(f"Cache write failed: {e}")
@@ -146,35 +168,6 @@ class DatabaseManager:
             return events
         except Exception as e:
             logger.error(f"✗ Chyba při načítání eventů: {e}")
-            return []
-    
-    def get_events_by_type(self, event_type: str, limit: int = 50) -> List[CrisisEvent]:
-        """Vrať eventy určitého typu"""
-        try:
-            collection = self.get_collection("events")
-            events_data = list(
-                collection.find({"type": event_type})
-                .sort("created_at", DESCENDING)
-                .limit(limit)
-            )
-            return [CrisisEvent.from_dict(d) for d in events_data]
-        except Exception as e:
-            logger.error(f"✗ Chyba při filtrování eventů: {e}")
-            return []
-    
-    def get_events_by_severity(self, min_severity: int = 1, max_severity: int = 5) -> List[CrisisEvent]:
-        """Vrať eventy určitého stupně závažnosti"""
-        try:
-            collection = self.get_collection("events")
-            events_data = list(
-                collection.find(
-                    {"severity": {"$gte": min_severity, "$lte": max_severity}}
-                )
-                .sort("created_at", DESCENDING)
-            )
-            return [CrisisEvent.from_dict(d) for d in events_data]
-        except Exception as e:
-            logger.error(f"✗ Chyba při filtrování eventů: {e}")
             return []
     
     def count_events(self) -> int:
@@ -281,10 +274,3 @@ class DatabaseManager:
             pass
         
         return result
-    
-    def close(self):
-        """Uzavři všechna připojení"""
-        if self._mongo_client:
-            self._mongo_client.close()
-        if self._redis_client:
-            self._redis_client.close()

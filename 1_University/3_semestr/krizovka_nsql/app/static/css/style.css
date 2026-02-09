@@ -509,12 +509,24 @@ main {
     background: #f9f9f9;
 }
 
-.events-table tbody tr.severity-5 {
-    border-left: 4px solid var(--severity-5);
+.events-table tbody tr.severity-1 {
+    border-left: 4px solid var(--severity-1);
+}
+
+.events-table tbody tr.severity-2 {
+    border-left: 4px solid var(--severity-2);
+}
+
+.events-table tbody tr.severity-3 {
+    border-left: 4px solid var(--severity-3);
 }
 
 .events-table tbody tr.severity-4 {
     border-left: 4px solid var(--severity-4);
+}
+
+.events-table tbody tr.severity-5 {
+    border-left: 4px solid var(--severity-5);
 }
 
 .events-table .event-title {

@@ -1,8 +1,7 @@
 """
 Routes - všechny endpointy
 """
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, session, current_app
-from datetime import datetime, timedelta
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, current_app
 import logging
 
 from .models import CrisisEvent, CRISIS_TYPES
@@ -119,7 +118,7 @@ def submit_event():
 def view_all():
     """Zobraz všechny events"""
     try:
-        # Pagination
+        # Pagination 
         page = request.args.get("page", 1, type=int)
         limit = 10  # 10 na stránku pro lepší demo
         skip = (page - 1) * limit
@@ -178,25 +177,3 @@ def delete_event(event_id):
     except Exception as e:
         logger.error(f"Error deleting event: {e}")
         return render_template("error.html", message=str(e)), 500
-
-
-@events_bp.route("/api/stats")
-def api_stats():
-    """API endpoint - get stats v JSON"""
-    try:
-        if current_app.db:
-            stats = {
-                "total_events": current_app.db.count_events(),
-                "events_by_severity": {
-                    "critical": len(current_app.db.get_events_by_severity(5, 5)),
-                    "high": len(current_app.db.get_events_by_severity(4, 4)),
-                    "medium": len(current_app.db.get_events_by_severity(3, 3)),
-                    "low": len(current_app.db.get_events_by_severity(1, 2)),
-                }
-            }
-            return jsonify(stats)
-        else:
-            return jsonify({"error": "Database unavailable"}), 500
-    except Exception as e:
-        logger.error(f"API stats error: {e}")
-        return jsonify({"error": str(e)}), 500

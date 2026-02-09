@@ -188,6 +188,16 @@ def fill_db(count: int = 20) -> None:
     db = DatabaseManager(mongo_uri=mongo_uri, redis_url=redis_url, db_name=db_name)
     
     print(f"\n{'='*60}")
+    print(f"Čištění databáze (mazání starých dat)...")
+    print(f"{'='*60}\n")
+    
+    try:
+        deleted = db.clear_all_events()
+        print(f"  🗑️  Smazáno {deleted} starých krizí\n")
+    except Exception as e:
+        print(f"  ❌ Chyba při čištění: {e}\n")
+    
+    print(f"\n{'='*60}")
     print(f"Naplňování databáze {count} testovacími krizami...")
     print(f"{'='*60}\n")
     

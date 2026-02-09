@@ -50,12 +50,6 @@ class CrisisEvent:
             doc["_id"] = self._id
         return doc
     
-    def to_json(self) -> str:
-        """Konvertuj na JSON string"""
-        data = self.to_dict()
-        data["created_at"] = data["created_at"].isoformat()
-        return json.dumps(data, default=str)
-    
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> "CrisisEvent":
         """Vytvoř CrisisEvent z dict (z MongoDB)"""
@@ -79,12 +73,12 @@ class CrisisEvent:
 
 # Typy crisis eventů
 CRISIS_TYPES = [
-    "přírodní_katastrofa",  # Zemětřesení, záplava, etc
-    "dopravní_nehoda",       # Auto, vlak, letadlo
-    "požár",                  # Fire
-    "zdravotnické_nouzové",  # Lékařský nouzový
-    "průmyslová_havárie",    # Industrial accident
-    "teroristický_útok",     # Terrorist attack
-    "únos",                   # Kidnapping
-    "ostatní"                 # Other
+    "přírodní_katastrofa", 
+    "dopravní_nehoda",      
+    "požár",                 
+    "zdravotnické_nouzové", 
+    "průmyslová_havárie",   
+    "teroristický_útok",    
+    "únos",                   
+    "ostatní"                 
 ]

@@ -57,22 +57,3 @@
     </section>
 </div>
 {% endblock %}
-
-{% block extra_js %}
-<script>
-    // Refresh stats každých 30 sekund
-    async function refreshStats() {
-        try {
-            const response = await fetch('{{ url_for("events.api_stats") }}');
-            const data = await response.json();
-            console.log('Stats:', data);
-            // Lze later updatovat UI dynamicky
-        } catch (e) {
-            console.error('Stats refresh error:', e);
-        }
-    }
-    
-    // Počáteční refresh + interval
-    setInterval(refreshStats, 30000);
-</script>
-{% endblock %}
