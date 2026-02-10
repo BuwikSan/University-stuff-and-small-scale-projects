@@ -7,6 +7,7 @@ import os
 
 from .config import config
 from .db import DatabaseManager
+from .initial_db_fill import fill_db
 
 
 def create_app(config_name: str = None):
