@@ -92,7 +92,7 @@ def submit_event():
             
             # Ulož do DB
             if current_app.db:
-                event_id = current_app.db.create_event(event)
+                event_id = current_app.db.create_event(event) #create 
                 logger.info(f"✓ Event vytvořen: {event_id}")
                 return redirect(url_for("events.view_all"))
             else:
@@ -124,7 +124,7 @@ def view_all():
         skip = (page - 1) * limit
         
         if current_app.db:
-            events = current_app.db.get_all_events(limit=limit + 1, skip=skip)
+            events = current_app.db.get_all_events(limit=limit + 1, skip=skip) # get
             total = current_app.db.count_events()
             has_next = len(events) > limit
             events = events[:limit]

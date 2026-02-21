@@ -96,8 +96,8 @@ class DatabaseManager:
         try:
             collection = self.get_collection("events")
             event_dict = event.to_dict()
-            result = collection.insert_one(event_dict)
-            
+            result = collection.insert_one(event_dict) # mongo insert one ------------------------------------------------
+
             # Invaliduj cache
             self._invalidate_events_cache()
             
@@ -129,7 +129,7 @@ class DatabaseManager:
         cache_key = "events:all"
         if limit <= 50:
             try:
-                cached = self.redis.get(cache_key)
+                cached = self.redis.get(cache_key) # redis get ------------------------------------------------
                 if cached:
                     data = json.loads(cached)
                     all_events = [CrisisEvent.from_dict(d) for d in data]
@@ -140,7 +140,7 @@ class DatabaseManager:
         
         # Pokud cache selže nebo je velký limit, jdi do MongoDB
         try:
-            collection = self.get_collection("events")
+            collection = self.get_collection("events") # mongo get ------------------------------------------------
             events_data = list(
                 collection.find()
                 .sort("created_at", DESCENDING)
@@ -157,7 +157,7 @@ class DatabaseManager:
                         collection.find()
                         .sort("created_at", DESCENDING)
                     )
-                    self.redis.setex(
+                    self.redis.setex( #set expiration (ttl) ------------------------------------------------
                         cache_key,
                         300,
                         json.dumps([e.to_dict() for e in [CrisisEvent.from_dict(d) for d in all_events_data]], default=str)
