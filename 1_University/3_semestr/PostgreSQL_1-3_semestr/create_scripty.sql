@@ -108,7 +108,7 @@ CREATE TABLE rooms (
     name TEXT NOT NULL,
     fk_building SERIAL NOT NULL,
     fk_func SERIAL NOT NULL,
-    
+
     CONSTRAINT fk_rooms_building FOREIGN KEY (fk_building) REFERENCES buildings(id_building),
     CONSTRAINT fk_rooms_function FOREIGN KEY (fk_func) REFERENCES functions(id_func)
 );
@@ -123,12 +123,13 @@ CREATE INDEX idx_employees_name ON employees(name);
 
 -- Index pro vyhledávání subjektů podle druhu a pohlaví (pro filtrování)
 CREATE INDEX idx_subjects_species ON subjects(fk_specie);
+CREATE INDEX idx_subjects_sex ON subjects(fk_sex);
 CREATE INDEX idx_subjects_name ON subjects(name);
 
 -- Index pro vyhledávání budov podle komplexu (hierarchické vyhledávání)
 CREATE INDEX idx_buildings_complex ON buildings(fk_complex);
 
--- Index pro vyhledávání místností podle budovy (hierarchické vyhledávání) 
+-- Index pro vyhledávání místností podle budovy (hierarchické vyhledávání)
 CREATE INDEX idx_rooms_building ON rooms(fk_building);
 CREATE INDEX idx_rooms_function ON rooms(fk_func);
 
@@ -144,12 +145,12 @@ CREATE INDEX idx_subjects_species_date ON subjects(fk_specie, date_of_creation);
 
 CREATE UNIQUE INDEX idx_unique_employee_identity ON employees(name, phone_number);
 
-CREATE INDEX idx_pos_description_fulltext ON positions USING gin(to_tsvector('en', description));
+CREATE INDEX idx_pos_description_fulltext ON positions USING gin(to_tsvector('simple', description));
 
 -- Komentáře k indexům:
 -- 1. Indexy na jména (employees, subjects) zrychlují vyhledávání podle textu
 -- 2. Indexy na cizí klíče (fk_*) zrychlují spojování tabulek (JOINy)
--- 3. Složený index umožňuje efektivní filtrování podle více kritérií najednou 
+-- 3. Složený index umožňuje efektivní filtrování podle více kritérií najednou
 
 
 -- no problema
